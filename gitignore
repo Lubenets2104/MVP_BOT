@@ -1,0 +1,42 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# ---- Environments ----
+.venv/
+venv/
+ENV/
+env/
+# ---- Secrets/Env ----
+.env
+.env.*
+.env.local
+
+# ---- Tools/IDE ----
+.idea/
+.vscode/
+
+# ---- Testing/Typecheck ----
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.coverage
+.coverage.*
+
+# ---- Notebooks ----
+.ipynb_checkpoints/
+
+# ---- OS/Other ----
+.DS_Store
+Thumbs.db
+
+# ---- Project-specific ----
+project.zip

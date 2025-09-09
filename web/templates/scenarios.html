@@ -1,0 +1,51 @@
+<!-- /app/templates/scenarios.html -->
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Admin · Scenarios</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; max-width: 1000px; margin: 32px auto; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border:1px solid #ddd; padding:8px; vertical-align: top; }
+    th { text-align:left; background:#f7f7f7; }
+    pre { margin:0; white-space:pre-wrap; }
+    a.button { display:inline-block; padding:6px 10px; border:1px solid #888; border-radius:6px; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <h1>Scenarios</h1>
+  <p><a href="/settings">← Назад в Settings</a> · <a class="button" href="/scenarios/new">+ Новый сценарий</a></p>
+
+  {% if items and items|length %}
+  <table>
+    <thead>
+      <tr>
+        <th>scenario</th>
+        <th>title</th>
+        <th>enabled</th>
+        <th>prompt_template</th>
+        <th>schema_json</th>
+        <th>updated</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in items %}
+      <tr>
+        <td><code>{{ r.scenario }}</code></td>
+        <td>{{ r.title }}</td>
+        <td>{{ '✅' if r.enabled else '—' }}</td>
+        <td><pre>{{ r.prompt_template or "" }}</pre></td>
+        <td><pre>{{ (r.schema_json or {}) | tojson(indent=2) }}</pre></td>
+        <td>{{ r.updated_at or '—' }}</td>
+        <td><a class="button" href="/scenarios/{{ r.scenario }}">Редактировать</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>Пока пусто. Нажми «Новый сценарий».</p>
+  {% endif %}
+</body>
+</html>

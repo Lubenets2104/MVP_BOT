@@ -1,0 +1,71 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./db/init_full.sql:/docker-entrypoint-initdb.d/000_init_full.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://app:app@db:5432/appdb}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASS: ${ADMIN_PASS:-admin}
+      TZ: ${TZ:-UTC}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8080/health',timeout=2).status==200 else 1)\""]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  bot:
+    build: ./bot
+    dns:
+        - 8.8.8.8
+        - 1.1.1.1
+    dns_opt:
+        - use-vc
+        - single-request-reopen
+        - attempts:2
+        - timeout:1
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://app:app@db:5432/appdb}
+      BOT_TOKEN: ${BOT_TOKEN}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_TEMPERATURE: ${OPENAI_TEMPERATURE:-0.2}
+      OPENAI_TOP_P: ${OPENAI_TOP_P:-1.0}
+      SPINNER_STICKER_ID: CAACAgIAAxkBA...   # ← ваш file_id
+      TZ: ${TZ:-UTC}
+      PYTHONPATH: /app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["python", "-m", "app"]
+    restart: unless-stopped
+
+volumes:
+  dbdata:

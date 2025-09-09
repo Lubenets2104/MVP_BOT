@@ -1,0 +1,96 @@
+<!-- web/templates/settings.html -->
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Admin · Settings</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; max-width: 900px; margin: 32px auto; }
+    textarea, input[type=text], input[type=number] { width: 100%; box-sizing: border-box; padding: 8px; }
+    .row { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 12px; align-items: center; }
+    .row > label { font-weight: 600; }
+    .checkbox { display: flex; gap: 8px; align-items: center; }
+    .card { border: 1px solid #ddd; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+    button { padding: 10px 16px; }
+    .help { color:#666; font-size: 12px; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>Настройки</h1>
+
+  <form method="post" action="/settings">
+    <!-- Основные тексты -->
+    <div class="card">
+      <div class="row">
+        <label for="greeting_text">Приветствие</label>
+        <textarea id="greeting_text" name="greeting_text" rows="3">{{ s.greeting_text or '' }}</textarea>
+      </div>
+      <div class="row">
+        <label for="system_prompt">System prompt</label>
+        <textarea id="system_prompt" name="system_prompt" rows="5">{{ s.system_prompt or '' }}</textarea>
+      </div>
+    </div>
+
+    <!-- Гейт канала -->
+    <div class="card">
+      <div class="checkbox">
+        <input type="checkbox" id="enable_channel_gate" name="enable_channel_gate" {% if s.enable_channel_gate %}checked{% endif %}>
+        <label for="enable_channel_gate">Включить проверку подписки на канал</label>
+      </div>
+      <div class="row">
+        <label for="telegram_channel_id">Channel ID (@name или -100...)</label>
+        <input id="telegram_channel_id" type="text" name="telegram_channel_id" value="{{ s.telegram_channel_id or '' }}">
+      </div>
+      <div class="row">
+        <label for="telegram_channel_url">Channel URL</label>
+        <input id="telegram_channel_url" type="text" name="telegram_channel_url" value="{{ s.telegram_channel_url or '' }}">
+      </div>
+      <div class="row">
+        <label for="bonus_sections">bonus_sections (JSON)</label>
+        <!-- ВАЖНО: печатаем объект JSON, без двойной сериализации -->
+        <textarea id="bonus_sections" name="bonus_sections" rows="8" spellcheck="false">{{ (s.bonus_sections or {}) | tojson(indent=2) }}</textarea>
+      </div>
+      <div class="row">
+        <label></label>
+        <div class="help">Пример: { "year": "referral", "karma": "channel", "finance": "channel" }</div>
+      </div>
+    </div>
+
+    <!-- Рефералы -->
+    <div class="card">
+      <div class="checkbox">
+        <input type="checkbox" id="enable_referrals" name="enable_referrals" {% if s.enable_referrals %}checked{% endif %}>
+        <label for="enable_referrals">Включить рефералы</label>
+      </div>
+      <div class="row">
+        <label for="referral_bonus_threshold">Порог рефералов</label>
+        <input id="referral_bonus_threshold" type="number" name="referral_bonus_threshold" value="{{ s.referral_bonus_threshold or 3 }}">
+      </div>
+    </div>
+
+    <!-- Прочие флаги -->
+    <div class="card">
+      <div class="checkbox">
+        <input type="checkbox" id="enable_compat" name="enable_compat" {% if s.enable_compat %}checked{% endif %}>
+        <label for="enable_compat">Включить совместимость (v2)</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="enable_periodic_horoscopes" name="enable_periodic_horoscopes" {% if s.enable_periodic_horoscopes %}checked{% endif %}>
+        <label for="enable_periodic_horoscopes">Включить периодические прогнозы (v2)</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="strict_json" name="strict_json" {% if s.strict_json %}checked{% endif %}>
+        <label for="strict_json">Строгая JSON-валидация</label>
+      </div>
+      <div class="row">
+        <label for="max_input_length">Макс. длина вводимых полей</label>
+        <input id="max_input_length" type="number" name="max_input_length" value="{{ s.max_input_length or 80 }}">
+      </div>
+    </div>
+
+    <p><button type="submit">Сохранить</button></p>
+  </form>
+
+  <p><a href="/scenarios">Перейти в Scenarios →</a></p>
+</body>
+</html>

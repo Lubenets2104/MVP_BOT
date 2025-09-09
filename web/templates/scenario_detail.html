@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% if is_new %}Новый сценарий{% else %}Сценарий: {{ s.scenario }}{% endif %}</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; }
+    h1 { margin-bottom: 1rem; }
+    form { max-width: 1000px; }
+    label { font-weight: 600; display:block; margin-top: 1rem; }
+    input[type="text"], textarea { width: 100%; box-sizing: border-box; padding: 8px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .actions { margin-top: 1.5rem; display:flex; gap: .75rem; }
+    a.btn, button { display:inline-block; padding:.55rem .9rem; border-radius:.5rem; border:1px solid #ddd; background:#fff; cursor:pointer; text-decoration:none; }
+    a.btn:hover, button:hover { background:#f6f6f6; }
+    .muted { color:#666; font-size:.9rem; }
+    code.inline { background:#f7f7f7; padding:.1rem .35rem; border-radius:.35rem; border:1px solid #eee; }
+  </style>
+</head>
+<body>
+  <h1>
+    {% if is_new %}Новый сценарий{% else %}Сценарий: <code class="inline">{{ s.scenario }}</code>{% endif %}
+  </h1>
+
+  <form method="post" action="{% if is_new %}/scenarios/new{% else %}/scenarios/{{ s.scenario }}{% endif %}">
+    {% if is_new %}
+      <label>Ключ сценария (a-z, 0-9, _; 2–40 символов)</label>
+      <input type="text" name="scenario_key" placeholder="mission / strengths / weaknesses / countries / business / love" required>
+    {% else %}
+      <label>Ключ сценария</label>
+      <input type="text" value="{{ s.scenario }}" disabled>
+    {% endif %}
+
+    <label>Название</label>
+    <input type="text" name="title" value="{{ s.title or '' }}" placeholder="Человекочитаемое название" required>
+
+    <label>Prompt template</label>
+    <textarea name="prompt_template" rows="10" placeholder="Инструкция для LLM (что вернуть и в каком формате)">{{ s.prompt_template or '' }}</textarea>
+
+    <label>JSON-схема ответа (schema_json)</label>
+    <textarea name="schema_json" rows="14" placeholder='Например: {"type":"object","required":["mission"],"properties":{"mission":{"type":"string"}}}'>{{ schema_json_str }}</textarea>
+    <p class="muted">Подсказка: схема используется для валидации ответа и повторного запроса (repair) при несоответствии.</p>
+
+    <div class="row">
+      <div>
+        <label>Включен</label>
+        <input type="checkbox" name="enabled" {% if s.enabled %}checked{% endif %}>
+      </div>
+      <div>
+        <label>Обновлено</label>
+        <input type="text" value="{{ s.updated_at or '—' }}" disabled>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit">💾 Сохранить</button>
+      <a class="btn" href="/scenarios">↩️ Назад к списку</a>
+      <a class="btn" href="/settings">⚙️ Настройки</a>
+    </div>
+  </form>
+</body>
+</html>
